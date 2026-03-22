@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Link Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-dark: #060612;
+      --glass-bg: rgba(255,255,255,0.045);
+      --glass-border: rgba(255,255,255,0.08);
+      --glass-hover: rgba(255,255,255,0.08);
+      --text-primary: rgba(255,255,255,0.93);
+      --text-secondary: rgba(255,255,255,0.45);
+      --text-muted: rgba(255,255,255,0.25);
+      --accent: #a78bfa;
+      --radius-card: 20px;
+      --radius-btn: 14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND ─── */
+    .bg-canvas {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      overflow: hidden;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.28;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 500px; height: 500px; background: #7c3aed; top: -150px; left: -100px; animation-delay: 0s; }
+    .orb-2 { width: 400px; height: 400px; background: #2563eb; top: 30%; right: -120px; animation-delay: -6s; }
+    .orb-3 { width: 350px; height: 350px; background: #059669; bottom: 10%; left: 20%; animation-delay: -12s; }
+    @keyframes drift {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(30px,40px) scale(1.08); }
+    }
+
+    /* Noise overlay */
+    .bg-canvas::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.4;
+    }
+
+    /* ─── LAYOUT ─── */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 60px 20px 80px;
+    }
+
+    /* ─── PROFILE ─── */
+    .profile {
+      text-align: center;
+      margin-bottom: 52px;
+      animation: fadeUp 0.7s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .avatar-wrap {
+      display: inline-block;
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .avatar-ring {
+      position: absolute; inset: -4px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, var(--accent), #60a5fa, #34d399, var(--accent));
+      animation: spin 6s linear infinite;
+      z-index: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .avatar-img {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      border: 3px solid var(--bg-dark);
+      object-fit: cover;
+      position: relative; z-index: 1;
+      display: block;
+    }
+
+    .profile-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.75rem, 5vw, 2.2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .profile-bio {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 300;
+      line-height: 1.6;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    /* ─── SECTION ─── */
+    .section {
+      margin-bottom: 36px;
+      animation: fadeUp 0.7s cubic-bezier(.22,1,.36,1) both;
+    }
+    .section:nth-child(1) { animation-delay: 0.1s; }
+    .section:nth-child(2) { animation-delay: 0.2s; }
+    .section:nth-child(3) { animation-delay: 0.3s; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 0 4px;
+    }
+    .section-icon {
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .section-title {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--glass-border);
+    }
+
+    /* ─── LINK CARDS ─── */
+    .links-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .link-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 15px 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-btn);
+      text-decoration: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .link-btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .link-btn:hover {
+      background: var(--glass-hover);
+      border-color: var(--btn-accent, rgba(255,255,255,0.15));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px var(--btn-accent, transparent);
+    }
+    .link-btn:hover::before { opacity: 1; }
+    .link-btn:active { transform: translateY(0); }
+
+    .btn-icon {
+      font-size: 1.1rem;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.07);
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .link-btn:hover .btn-icon {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .btn-text {
+      flex: 1;
+      font-size: 0.9rem;
+      font-weight: 400;
+    }
+
+    .btn-badge {
+      font-size: 0.68rem;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-arrow {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: transform 0.2s, color 0.2s;
+    }
+    .link-btn:hover .btn-arrow {
+      transform: translateX(3px);
+      color: var(--text-secondary);
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      text-align: center;
+      margin-top: 56px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+    }
+    .footer a { color: var(--text-muted); text-decoration: none; }
+    .footer a:hover { color: var(--text-secondary); }
+
+    /* ─── ANIMATION ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 480px) {
+      .page { padding: 40px 16px 60px; }
+      .btn-badge { display: none; }
+    }
+
+    /* ─── LOADING STATE ─── */
+    .skeleton { animation: shimmer 1.5s infinite; }
+    @keyframes shimmer {
+      0%,100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-canvas">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<main class="page" id="app">
+  <!-- Content injected by JS -->
+</main>
+
+<script>
+  async function init() {
+    let data;
+    try {
+      const res = await fetch('./links.json');
+      if (!res.ok) throw new Error('Failed to load links.json');
+      data = await res.json();
+    } catch (e) {
+      document.getElementById('app').innerHTML = `
+        <div style="text-align:center;padding:60px 0;color:rgba(255,255,255,0.4)">
+          <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
+          <div>Could not load <code>links.json</code>.<br>Make sure it's in the same folder as <code>index.html</code>.</div>
+          <div style="margin-top:8px;font-size:0.8rem;opacity:0.5">${e.message}</div>
+        </div>`;
+      return;
+    }
+
+    const { profile, sections } = data;
+
+    // Update page title
+    document.title = `${profile.name} — Links`;
+
+    // Update accent CSS variable
+    if (profile.accent) {
+      document.documentElement.style.setProperty('--accent', profile.accent);
+    }
+
+    // Build HTML
+    const app = document.getElementById('app');
+
+    // Profile
+    const profileEl = document.createElement('div');
+    profileEl.className = 'profile';
+    profileEl.innerHTML = `
+      <div class="avatar-wrap">
+        <div class="avatar-ring"></div>
+        <img class="avatar-img" src="${escHtml(profile.photo)}" alt="${escHtml(profile.name)}" />
+      </div>
+      <h1 class="profile-name">${escHtml(profile.name)}</h1>
+      <p class="profile-bio">${escHtml(profile.bio)}</p>
+    `;
+    app.appendChild(profileEl);
+
+    // Sections
+    sections.forEach((section, si) => {
+      const sectionEl = document.createElement('section');
+      sectionEl.className = 'section';
+      sectionEl.style.animationDelay = `${(si + 1) * 0.1}s`;
+
+      const header = `
+        <div class="section-header">
+          <span class="section-icon" style="color:${escHtml(section.accentColor)}">${escHtml(section.icon)}</span>
+          <span class="section-title">${escHtml(section.title)}</span>
+          <div class="section-line"></div>
+        </div>
+      `;
+
+      const linksHtml = section.links.map(link => {
+        const badge = link.badge
+          ? `<span class="btn-badge">${escHtml(link.badge)}</span>`
+          : '';
+        return `
+          <a class="link-btn"
+             href="${escHtml(link.url)}"
+             target="_blank"
+             rel="noopener noreferrer"
+             style="--btn-accent:${escHtml(section.accentColor)}33">
+            <span class="btn-icon">${escHtml(link.icon || '→')}</span>
+            <span class="btn-text">${escHtml(link.label)}</span>
+            ${badge}
+            <span class="btn-arrow">→</span>
+          </a>`;
+      }).join('');
+
+      sectionEl.innerHTML = header + `<div class="links-grid">${linksHtml}</div>`;
+      app.appendChild(sectionEl);
+    });
+
+    // Footer
+    const footer = document.createElement('div');
+    footer.className = 'footer';
+    footer.innerHTML = `Built with ♡ &nbsp;·&nbsp; <span style="opacity:0.5">${escHtml(profile.name)}</span>`;
+    app.appendChild(footer);
+  }
+
+  function escHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  init();
+</script>
+</body>
+</html>
