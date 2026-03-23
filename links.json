@@ -52,43 +52,43 @@
         {
           "label": "TradingView",
           "url": "https://tradingview.com/?aff_id=yourcode",
-          "icon": "tradingview",
+          "icon": "https://www.google.com/s2/favicons?domain=tradingview.com&sz=64",
           "badge": "30 days free Pro"
         },
         {
           "label": "Moomoo",
           "url": "https://moomoo.com/us/invite/yourcode",
-          "icon": "moomoo",
+          "icon": "https://www.google.com/s2/favicons?domain=moomoo.com&sz=64",
           "badge": "5 free stocks"
         },
         {
           "label": "Webull",
           "url": "https://webull.com",
-          "icon": "webull",
+          "icon": "https://www.google.com/s2/favicons?domain=webull.com&sz=64",
           "badge": "Free stocks"
         },
         {
           "label": "M+ Global",
           "url": "https://mplus.com",
-          "icon": "mplus",
+          "icon": "https://www.google.com/s2/favicons?domain=mplusglobal.com&sz=64",
           "badge": "Sign up bonus"
         },
         {
           "label": "Setel",
           "url": "https://setel.com/referral/yourcode",
-          "icon": "setel",
+          "icon": "https://www.google.com/s2/favicons?domain=setel.com&sz=64",
           "badge": "Referral bonus"
         },
         {
           "label": "Wise",
           "url": "https://wise.com/invite/yourcode",
-          "icon": "wise",
+          "icon": "https://www.google.com/s2/favicons?domain=wise.com&sz=64",
           "badge": "Fee-free transfer"
         },
         {
           "label": "Aeon Bank",
           "url": "https://aeonbank.com.my/referral/yourcode",
-          "icon": "aeonbank",
+          "icon": "https://www.google.com/s2/favicons?domain=aeonbank.com.my&sz=64",
           "badge": "Referral bonus"
         }
       ]
@@ -101,7 +101,7 @@
         {
           "label": "My Blog",
           "url": "https://yourblog.com",
-          "icon": "myblog"
+          "icon": "https://www.google.com/s2/favicons?domain=myblog.com&sz=64"
         }
       ]
     }
