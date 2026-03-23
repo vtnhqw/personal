@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alex Rivera — Links</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07070f;
+      --glass: rgba(255,255,255,0.042);
+      --glass-b: rgba(255,255,255,0.075);
+      --glass-hover: rgba(255,255,255,0.075);
+      --text-1: rgba(255,255,255,0.92);
+      --text-2: rgba(255,255,255,0.48);
+      --text-3: rgba(255,255,255,0.22);
+      --radius: 16px;
+      --accent: #a78bfa;
+    }
+
+    html, body { min-height: 100%; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-1); overflow-x: hidden; }
+
+    /* ANIMATED MESH GRADIENT */
+    .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .bg canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    /* PAGE */
+    .page { position:relative;z-index:1;max-width:560px;margin:0 auto;padding:0 0 88px; }
+
+    /* BANNER */
+    .banner-wrap {
+      width:100%; height:175px;
+      border-radius:0 0 24px 24px;
+      overflow:hidden;
+      background: linear-gradient(135deg,rgba(109,40,217,0.5),rgba(29,78,216,0.4),rgba(6,95,70,0.35));
+      border-bottom:1px solid rgba(255,255,255,0.07);
+      position:relative;
+    }
+    .banner-img { width:100%;height:100%;object-fit:cover;display:block; }
+    .banner-empty {
+      width:100%;height:100%;
+      display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;
+      cursor:pointer;
+    }
+    .banner-empty-icon { font-size:1.4rem;opacity:0.3; }
+    .banner-empty-text { font-size:0.7rem;color:var(--text-3);letter-spacing:0.1em;text-transform:uppercase; }
+
+    /* PROFILE CARD */
+    .profile {
+      text-align:center;
+      margin-bottom:28px;
+      animation:up .65s cubic-bezier(.22,1,.36,1) both;
+    }
+    .avatar-row {
+      display:flex;
+      justify-content:center;
+      margin-top:-46px;
+      margin-bottom:14px;
+    }
+    .avatar-wrap {
+      position: relative;
+      display: inline-block;
+      border-radius: 24px;
+      padding: 3px;
+      background: linear-gradient(135deg, #a78bfa, #3b82f6, #7c3aed, #60a5fa, #a78bfa);
+      background-size: 300% 300%;
+      animation: gradientShift 3s ease infinite;
+      box-shadow: 0 0 18px rgba(139,92,246,0.5), 0 0 36px rgba(59,130,246,0.25);
+    }
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%;   box-shadow: 0 0 18px rgba(139,92,246,0.6), 0 0 36px rgba(59,130,246,0.2); }
+      50%  { background-position: 100% 50%; box-shadow: 0 0 28px rgba(59,130,246,0.7), 0 0 48px rgba(139,92,246,0.3); }
+      100% { background-position: 0% 50%;   box-shadow: 0 0 18px rgba(139,92,246,0.6), 0 0 36px rgba(59,130,246,0.2); }
+    }
+    .avatar-img {
+      width:92px;height:92px;
+      border-radius:20px;
+      border: 2px solid var(--bg);
+      object-fit:cover;display:block;
+    }
+    .name { font-family:'Syne',sans-serif;font-size:clamp(1.6rem,5vw,2rem);font-weight:600;letter-spacing:-0.02em;margin-bottom:8px; }
+    .bio { font-size:0.875rem;color:var(--text-2);font-weight:300;line-height:1.65;max-width:320px;margin:0 auto; }
+
+    /* PILL NAV */
+    .nav-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 24px 18px 32px;
+      animation: up .65s cubic-bezier(.22,1,.36,1) .08s both;
+    }
+    .nav-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 5px 6px;
+      background: rgba(15,15,22,0.82);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 99px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.05) inset;
+      white-space: nowrap;
+    }
+    .nav-tab {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      padding: 7px 16px;
+      border-radius: 99px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.45);
+      cursor: pointer;
+      transition: background .2s, color .2s;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .nav-tab:hover { color: rgba(255,255,255,0.85); }
+
+    .nav-bar::-webkit-scrollbar { display: none; }
+    .nav-bar { -ms-overflow-style: none; scroll-behavior: smooth; position: relative; }
+    .nav-pill-slider {
+      position: absolute;
+      top: 5px; left: 6px;
+      height: calc(100% - 10px);
+      background: rgba(255,255,255,0.12);
+      border-radius: 99px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), width 0.3s cubic-bezier(.34,1.56,.64,1);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .nav-tab {
+      position: relative;
+      z-index: 1;
+    }
+    .nav-tab.active {
+      background: transparent;
+      color: rgba(255,255,255,0.95);
+      box-shadow: none;
+    }
+
+    /* SECTIONS */
+    .sections-wrap { padding:0 18px; }
+    .section { margin-bottom:32px;animation:up .65s cubic-bezier(.22,1,.36,1) both; }
+    .section.hidden { display:none; }
+    .section-header { display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:0 2px; }
+    .section-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+    .section-title { font-size:0.68rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-3); }
+    .section-line { flex:1;height:1px;background:rgba(255,255,255,0.06); }
+
+    /* LINK BUTTONS */
+    .links { display:flex;flex-direction:column;gap:9px; }
+    .link-btn { display:flex;align-items:center;gap:13px;padding:13px 18px;background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius);text-decoration:none;color:var(--text-1);cursor:pointer;transition:background .2s,border-color .2s,transform .2s,box-shadow .2s;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:relative;overflow:hidden; }
+    .link-btn::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.055) 0%,transparent 55%);opacity:0;transition:opacity .25s; }
+    .link-btn:hover { background:var(--glass-hover);border-color:var(--btn-accent,rgba(255,255,255,0.14));transform:translateY(-2px);box-shadow:0 10px 36px rgba(0,0,0,.35); }
+    .link-btn:hover::before { opacity:1; }
+    .link-btn:active { transform:translateY(0); }
+
+    /* NEON GLOW PULSE on hover */
+    .link-btn::before {
+      background: linear-gradient(135deg,rgba(255,255,255,0.055) 0%,transparent 55%);
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .link-btn .beam-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      pointer-events: none;
+      border: 1.5px solid transparent;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1;
+    }
+    .link-btn:hover .beam-ring {
+      opacity: 1;
+      border-color: #a78bfa;
+      animation: neonPulse 2s ease-in-out infinite;
+    }
+    @keyframes neonPulse {
+      0%, 100% {
+        border-color: #a78bfa;
+        box-shadow:
+          0 0 4px #a78bfa,
+          0 0 10px #a78bfa,
+          0 0 22px #7c3aed,
+          inset 0 0 8px rgba(167,139,250,0.08);
+      }
+      50% {
+        border-color: #60a5fa;
+        box-shadow:
+          0 0 6px #60a5fa,
+          0 0 18px #3b82f6,
+          0 0 40px #1d4ed8,
+          inset 0 0 14px rgba(96,165,250,0.12);
+      }
+    }
+    .btn-icon { width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;flex-shrink:0;overflow:hidden;transition:none; }
+    .link-btn:hover .btn-icon { background:transparent; }
+    .btn-icon svg { width:28px;height:28px; }
+    .btn-text { flex:1;font-size:0.88rem;font-weight:400; }
+    .btn-badge { font-size:0.67rem;font-weight:500;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);color:var(--text-2);white-space:nowrap;flex-shrink:0; }
+    .btn-arrow { font-size:0.8rem;color:var(--text-3);flex-shrink:0;transition:transform .2s,color .2s; }
+    .link-btn:hover .btn-arrow { transform:translateX(3px);color:var(--text-2); }
+
+    .footer { text-align:center;margin-top:52px;color:var(--text-3);font-size:0.72rem;letter-spacing:0.06em; }
+
+    @keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    @media(max-width:460px){ .btn-badge{display:none;} }
+  </style>
+</head>
+<body>
+<div class="bg"><canvas id="mesh"></canvas></div>
+<main class="page" id="app"></main>
+
+<script>
+const ICONS = {
+  instagram: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="ig1" cx="30%" cy="107%" r="130%">
+        <stop offset="0%"   stop-color="#ffd600"/>
+        <stop offset="20%"  stop-color="#ff6f00"/>
+        <stop offset="45%"  stop-color="#e91e63"/>
+        <stop offset="70%"  stop-color="#ad1aac"/>
+        <stop offset="100%" stop-color="#4a00b4"/>
+      </radialGradient>
+      <radialGradient id="ig2" cx="28%" cy="100%" r="120%">
+        <stop offset="0%"   stop-color="#ffd600" stop-opacity="0.5"/>
+        <stop offset="50%"  stop-color="#ff6f00" stop-opacity="0.2"/>
+        <stop offset="100%" stop-color="#ff6f00" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <!-- Rounded square background -->
+    <rect width="24" height="24" rx="6" fill="url(#ig1)"/>
+    <rect width="24" height="24" rx="6" fill="url(#ig2)"/>
+    <!-- Outer rounded square stroke -->
+    <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="white" stroke-width="1.5"/>
+    <!-- Circle -->
+    <circle cx="12" cy="12" r="4" fill="none" stroke="white" stroke-width="1.5"/>
+    <!-- Dot -->
+    <circle cx="17" cy="7" r="1.2" fill="white"/>
+  </svg>`,
+  x: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#000"/><path fill="white" d="M17.53 4h2.19L13.54 11.3 20.8 20h-5.18l-4.33-5.66L6.34 20H4.14l6.54-7.48L4 4h5.3l3.91 5.11L17.53 4Zm-.77 14.4h1.21L7.33 5.24H6.03l10.73 13.16Z"/></svg>`,
+  tiktok: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <rect width="24" height="24" rx="6" fill="#010101"/>
+    <g transform="translate(3, 2.2) scale(0.76)">
+      <!-- Cyan shadow -->
+      <path d="M20.5 8.8a5.6 5.6 0 0 1-3.3-1.06v4.84a4.38 4.38 0 1 1-3.8-4.33v2.42a1.98 1.98 0 1 0 1.38 1.91V3.5h2.42a3.2 3.2 0 0 0 3.3 2.98v2.32Z"
+        fill="#69C9D0" transform="translate(-0.6, 0.6)"/>
+      <!-- Pink shadow -->
+      <path d="M20.5 8.8a5.6 5.6 0 0 1-3.3-1.06v4.84a4.38 4.38 0 1 1-3.8-4.33v2.42a1.98 1.98 0 1 0 1.38 1.91V3.5h2.42a3.2 3.2 0 0 0 3.3 2.98v2.32Z"
+        fill="#EE1D52" transform="translate(0.6, -0.6)"/>
+      <!-- White main -->
+      <path d="M20.5 8.8a5.6 5.6 0 0 1-3.3-1.06v4.84a4.38 4.38 0 1 1-3.8-4.33v2.42a1.98 1.98 0 1 0 1.38 1.91V3.5h2.42a3.2 3.2 0 0 0 3.3 2.98v2.32Z"
+        fill="white"/>
+    </g>
+  </svg>`,
+  youtube: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#FF0000"/><path d="M19.6 8.2a2 2 0 0 0-1.4-1.4C17 6.5 12 6.5 12 6.5s-5 0-6.2.3a2 2 0 0 0-1.4 1.4C4.1 9.4 4.1 12 4.1 12s0 2.6.3 3.8a2 2 0 0 0 1.4 1.4C7 17.5 12 17.5 12 17.5s5 0 6.2-.3a2 2 0 0 0 1.4-1.4c.3-1.2.3-3.8.3-3.8s0-2.6-.3-3.8Z" fill="white" opacity="0.9"/><path d="M10.3 14.5V9.5l4.7 2.5-4.7 2.5Z" fill="#FF0000"/></svg>`,
+  linkedin: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <rect width="24" height="24" rx="5" fill="#0A66C2"/>
+    <!-- dot above i -->
+    <circle cx="6.2" cy="6.2" r="1.6" fill="white"/>
+    <!-- i stem -->
+    <rect x="4.9" y="9.2" width="2.6" height="9.8" rx="0.4" fill="white"/>
+    <!-- n -->
+    <path fill="white" d="M10.2 9.2h2.5v1.3c.6-.9 1.6-1.5 2.8-1.5 2.2 0 3.5 1.4 3.5 3.9v6.1h-2.6v-5.6c0-1.2-.5-1.9-1.5-1.9-1.1 0-1.7.8-1.7 2v5.5h-2.6V9.2Z"/>
+  </svg>`,
+  github: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#171515"/><path fill="white" d="M12 2.25A9.75 9.75 0 0 0 2.25 12c0 4.31 2.79 7.96 6.67 9.24.49.09.67-.21.67-.47v-1.65c-2.71.59-3.29-1.31-3.29-1.31-.44-1.13-1.08-1.43-1.08-1.43-.88-.6.07-.59.07-.59.98.07 1.49 1 1.49 1 .87 1.49 2.28 1.06 2.83.81.09-.63.34-1.06.62-1.3-2.16-.25-4.44-1.08-4.44-4.81 0-1.06.38-1.93 1-2.61-.1-.25-.44-1.24.1-2.58 0 0 .82-.26 2.68 1a9.33 9.33 0 0 1 4.88 0c1.86-1.26 2.68-1 2.68-1 .54 1.34.2 2.33.1 2.58.62.68 1 1.55 1 2.61 0 3.74-2.28 4.56-4.45 4.8.35.3.66.9.66 1.82v2.7c0 .26.18.57.67.47A9.75 9.75 0 0 0 21.75 12 9.75 9.75 0 0 0 12 2.25Z"/></svg>`,
+  tradingview: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#1848CC"/><path d="M4 16l4-5 3 3 4-6 5 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="4" cy="16" r="1.3" fill="#2962FF"/><circle cx="20" cy="12" r="1.3" fill="white"/></svg>`,
+  wise: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#9FE870"/><text x="12" y="16.5" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="11" fill="#163300">W</text></svg>`,
+  revolut: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#191C1F"/><path fill="white" d="M9 5h4.5a3.5 3.5 0 0 1 1.04 6.84l2.4 3.16H14.3l-2.2-2.9H11v2.9H9V5Zm2 2v3h2.5a1.5 1.5 0 0 0 0-3H11Z"/></svg>`,
+  moomoo: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#FF6A00"/><text x="12" y="16" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="10" fill="white">moo</text></svg>`,
+  blog: `<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z"/></svg>`,
+  newsletter: `<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+  default: `<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"/></svg>`
+};
+
+function getIcon(key) { return ICONS[key] || ICONS['default']; }
+
+function setFilter(id) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === id));
+
+  /* slide the pill */
+  const activeTab = document.querySelector('.nav-tab.active');
+  const slider = document.querySelector('.nav-pill-slider');
+  if (activeTab && slider) {
+    const nav = document.querySelector('.nav-bar');
+    const navRect = nav.getBoundingClientRect();
+    const tabRect = activeTab.getBoundingClientRect();
+    slider.style.width = tabRect.width + 'px';
+    slider.style.transform = 'translateX(' + (tabRect.left - navRect.left - 6 + nav.scrollLeft) + 'px)';
+  }
+
+  /* animate sections out then in */
+  const sections = document.querySelectorAll('.section[data-id]');
+  sections.forEach(s => {
+    const show = id === 'all' || s.dataset.id === id;
+    if (!show) {
+      s.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+      s.style.opacity = '0';
+      s.style.transform = 'translateY(8px)';
+      setTimeout(() => s.classList.add('hidden'), 180);
+    }
+  });
+  setTimeout(() => {
+    sections.forEach(s => {
+      const show = id === 'all' || s.dataset.id === id;
+      if (show) {
+        s.classList.remove('hidden');
+        s.style.opacity = '0';
+        s.style.transform = 'translateY(10px)';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            s.style.transition = 'opacity 0.28s ease, transform 0.28s cubic-bezier(.22,1,.36,1)';
+            s.style.opacity = '1';
+            s.style.transform = 'translateY(0)';
+          });
+        });
+      }
+    });
+  }, 180);
+}
+
+function initSliderPill() {
+  const nav = document.querySelector('.nav-bar');
+  if (!nav) return;
+  const pill = document.createElement('div');
+  pill.className = 'nav-pill-slider';
+  nav.insertBefore(pill, nav.firstChild);
+
+  /* position on first active tab */
+  requestAnimationFrame(() => {
+    const activeTab = document.querySelector('.nav-tab.active');
+    if (activeTab) {
+      const navRect = nav.getBoundingClientRect();
+      const tabRect = activeTab.getBoundingClientRect();
+      pill.style.width = tabRect.width + 'px';
+      pill.style.transform = 'translateX(' + (tabRect.left - navRect.left - 6) + 'px)';
+      /* disable transition on first paint */
+      pill.style.transition = 'none';
+      requestAnimationFrame(() => {
+        pill.style.transition = '';
+      });
+    }
+  });
+}
+
+function initDraggableNav() {
+  const nav = document.querySelector('.nav-bar');
+  if (!nav) return;
+  let isDown = false, startX, scrollLeft, moved = false;
+
+  nav.style.overflowX = 'auto';
+  nav.style.scrollbarWidth = 'none';
+  nav.style.cursor = 'grab';
+
+  nav.addEventListener('mousedown', e => {
+    isDown = true; moved = false;
+    startX = e.pageX - nav.offsetLeft;
+    scrollLeft = nav.scrollLeft;
+    nav.style.cursor = 'grabbing';
+  });
+  document.addEventListener('mouseup', () => {
+    isDown = false;
+    nav.style.cursor = 'grab';
+  });
+  nav.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - nav.offsetLeft;
+    const walk = (x - startX) * 1.2;
+    if (Math.abs(walk) > 4) moved = true;
+    nav.scrollLeft = scrollLeft - walk;
+  });
+
+  /* touch support */
+  let touchStartX, touchScrollLeft;
+  nav.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].pageX - nav.offsetLeft;
+    touchScrollLeft = nav.scrollLeft;
+    moved = false;
+  }, { passive: true });
+  nav.addEventListener('touchmove', e => {
+    const x = e.touches[0].pageX - nav.offsetLeft;
+    const walk = (x - touchStartX) * 1.2;
+    if (Math.abs(walk) > 4) moved = true;
+    nav.scrollLeft = touchScrollLeft - walk;
+  }, { passive: true });
+
+  /* cancel click if user dragged */
+  nav.addEventListener('click', e => {
+    if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
+  }, true);
+}
+
+async function loadAndBuild() {
+  let DATA;
+  try {
+    const res = await fetch('./links.json');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    DATA = await res.json();
+  } catch(e) {
+    document.getElementById('app').innerHTML = `<div style="text-align:center;padding:80px 20px;color:rgba(255,255,255,.4)"><div style="font-size:2rem;margin-bottom:12px">⚠️</div><div>Could not load <code>links.json</code><br><small style="opacity:.5">${e.message}</small></div></div>`;
+    return;
+  }
+  (function build() {
+  const { profile, sections } = DATA;
+  document.title = profile.name + ' — Links';
+  document.documentElement.style.setProperty('--accent', profile.accent || '#a78bfa');
+
+  const bannerContent = profile.banner
+    ? `<img class="banner-img" src="${profile.banner}" alt="banner" />`
+    : `<div class="banner-empty">
+         <div class="banner-empty-icon">🖼</div>
+         <div class="banner-empty-text">Add banner.jpg to your folder</div>
+       </div>`;
+
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="banner-wrap">${bannerContent}</div>
+
+    <div class="profile">
+      <div class="avatar-row">
+        <div class="avatar-wrap"><img class="avatar-img" src="${profile.photo}" alt="${profile.name}" /></div>
+      </div>
+      <h1 class="name">${profile.name}</h1>
+      <p class="bio">${profile.bio}</p>
+    </div>
+
+    <div class="nav-wrap"><nav class="nav-bar">
+      <button class="nav-tab active" data-filter="all" onclick="setFilter('all')">All</button>
+      ${sections.map(s => `<button class="nav-tab" data-filter="${s.id}" onclick="setFilter('${s.id}')">${s.title}</button>`).join('')}
+    </nav></div>
+
+    <div class="sections-wrap">
+      ${sections.map((sec, si) => `
+        <section class="section" data-id="${sec.id}" style="animation-delay:${si*0.08+0.1}s">
+          <div class="section-header">
+            <span class="section-dot" style="background:${sec.accentColor}"></span>
+            <span class="section-title">${sec.title}</span>
+            <div class="section-line"></div>
+          </div>
+          <div class="links">
+            ${sec.links.map(link => `
+              <a class="link-btn" href="${link.url}" target="_blank" rel="noopener noreferrer" style="--btn-accent:${sec.accentColor}40">
+                <span class="btn-icon">${getIcon(link.icon)}</span>
+                <span class="btn-text">${link.label}</span>
+                ${link.badge ? `<span class="btn-badge">${link.badge}</span>` : ''}
+                <span class="btn-arrow">›</span>
+              <span class="beam-ring"></span>
+              </a>`).join('')}
+          </div>
+        </section>`).join('')}
+
+      <div class="footer">${profile.name} · built with ♡</div>
+    </div>
+  `;
+  })();
+  initDraggableNav();
+  initSliderPill();
+}
+loadAndBuild();
+
+/* ── ANIMATED MESH GRADIENT ── */
+(function meshGradient() {
+  const canvas = document.getElementById('mesh');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* Define blobs — each has a position, size, colour, and individual speed */
+  const blobs = [
+    { x: 0.15, y: 0.10, r: 0.52, color: [109, 40, 217],  sx: 0.00018, sy: 0.00012 },
+    { x: 0.80, y: 0.25, r: 0.45, color: [29,  78, 216],  sx: -0.00014, sy: 0.00016 },
+    { x: 0.50, y: 0.70, r: 0.48, color: [6,   95,  70],  sx: 0.00012, sy: -0.00018 },
+    { x: 0.20, y: 0.80, r: 0.38, color: [124, 58, 237],  sx: 0.00020, sy: -0.00010 },
+    { x: 0.85, y: 0.75, r: 0.40, color: [30,  64, 175],  sx: -0.00016, sy: -0.00014 },
+    { x: 0.50, y: 0.35, r: 0.35, color: [76,  29, 149],  sx: -0.00010, sy: 0.00020 },
+  ];
+
+  /* Each blob oscillates with sin/cos for organic motion */
+  const phases = blobs.map(() => ({
+    px: Math.random() * Math.PI * 2,
+    py: Math.random() * Math.PI * 2,
+    ampx: 0.12 + Math.random() * 0.1,
+    ampy: 0.10 + Math.random() * 0.1,
+    speed: 0.0004 + Math.random() * 0.0003
+  }));
+
+  let t = 0;
+
+  function draw() {
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    /* Deep dark base */
+    ctx.fillStyle = '#07070f';
+    ctx.fillRect(0, 0, W, H);
+
+    blobs.forEach((b, i) => {
+      const p = phases[i];
+      const cx = (b.x + Math.sin(t * p.speed + p.px) * p.ampx) * W;
+      const cy = (b.y + Math.cos(t * p.speed + p.py) * p.ampy) * H;
+      const radius = b.r * Math.min(W, H);
+      const [r, g, bl] = b.color;
+
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      grad.addColorStop(0,   `rgba(${r},${g},${bl},0.28)`);
+      grad.addColorStop(0.5, `rgba(${r},${g},${bl},0.10)`);
+      grad.addColorStop(1,   `rgba(${r},${g},${bl},0)`);
+
+      ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.globalCompositeOperation = 'source-over';
+    t++;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Link Hub Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d18;--panel:#13131f;--card:#1a1a2e;--border:rgba(255,255,255,0.08);
+  --text1:rgba(255,255,255,0.92);--text2:rgba(255,255,255,0.5);--text3:rgba(255,255,255,0.22);
+  --accent:#a78bfa;--accent2:#60a5fa;--green:#34d399;--red:#f87171;
+  --radius:12px;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text1);font-family:'Inter',sans-serif;font-size:14px}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:420px;min-width:420px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.preview-pane{flex:1;background:#07070f;overflow-y:auto;position:relative}
+
+/* ── SIDEBAR HEADER ── */
+.sidebar-header{padding:20px 20px 0;border-bottom:1px solid var(--border);flex-shrink:0}
+.sidebar-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:600;margin-bottom:16px}
+.tabs-row{display:flex;gap:4px;padding-bottom:0}
+.editor-tab{padding:8px 16px;border-radius:8px 8px 0 0;border:none;background:transparent;color:var(--text2);font-size:0.8rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.editor-tab.active{background:var(--card);color:var(--text1)}
+.editor-tab:hover:not(.active){color:var(--text1)}
+
+/* ── SIDEBAR BODY ── */
+.sidebar-body{flex:1;overflow-y:auto;padding:16px}
+.sidebar-body::-webkit-scrollbar{width:4px}
+.sidebar-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:4px}
+
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── FORM ELEMENTS ── */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:0.72rem;font-weight:500;color:var(--text2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:5px}
+.field input,.field textarea,.field select{
+  width:100%;padding:9px 12px;background:var(--card);border:1px solid var(--border);
+  border-radius:8px;color:var(--text1);font-family:'Inter',sans-serif;font-size:0.85rem;
+  transition:border-color .2s;outline:none;
+}
+.field textarea{resize:vertical;min-height:70px;line-height:1.5}
+.field input:focus,.field textarea:focus{border-color:var(--accent)}
+.field input[type=color]{padding:4px;height:36px;cursor:pointer}
+
+/* ── PHOTO UPLOAD ── */
+.photo-upload-wrap{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.photo-preview{width:64px;height:64px;border-radius:14px;object-fit:cover;border:2px solid var(--border);flex-shrink:0;background:var(--card)}
+.photo-preview.banner-prev{width:100%;height:72px;border-radius:10px;object-fit:cover;border:2px solid var(--border);margin-bottom:14px}
+.upload-btn{flex:1;padding:9px 12px;background:var(--card);border:1px dashed rgba(255,255,255,0.2);border-radius:8px;color:var(--text2);font-size:0.8rem;cursor:pointer;text-align:center;transition:all .2s}
+.upload-btn:hover{border-color:var(--accent);color:var(--accent)}
+input[type=file]{display:none}
+
+/* ── CROP MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px;width:420px;max-width:95vw}
+.modal h3{font-family:'Syne',sans-serif;font-size:1rem;margin-bottom:16px}
+.crop-wrap{position:relative;width:100%;height:280px;background:#000;border-radius:10px;overflow:hidden;cursor:crosshair}
+.crop-img{position:absolute;transform-origin:top left;user-select:none;-webkit-user-drag:none}
+.crop-box{position:absolute;border:2px solid white;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);cursor:move}
+.crop-box.circle-mask{border-radius:50%}
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.crop-slider-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.crop-slider-row label{font-size:0.75rem;color:var(--text2);white-space:nowrap}
+.crop-slider-row input{flex:1}
+
+/* ── SECTION CARDS ── */
+.section-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.section-card-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.section-card-header:hover{background:rgba(255,255,255,0.03)}
+.section-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.section-card-title{flex:1;font-weight:500;font-size:0.85rem}
+.section-card-body{padding:0 14px 14px;border-top:1px solid var(--border)}
+.section-card-body.collapsed{display:none}
+
+/* ── LINK ROWS ── */
+.link-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.link-row:last-child{border-bottom:none}
+.link-row-icon{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;overflow:hidden}
+.link-row-icon svg{width:18px;height:18px}
+.link-row-inputs{flex:1;display:flex;flex-direction:column;gap:4px}
+.link-row-inputs input{padding:5px 8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.06);border-radius:6px;color:var(--text1);font-size:0.78rem;font-family:'Inter',sans-serif;outline:none;width:100%}
+.link-row-inputs input:focus{border-color:var(--accent)}
+.link-row-badge input{padding:4px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:6px;color:var(--text2);font-size:0.72rem;font-family:'Inter',sans-serif;outline:none;width:100%;margin-top:3px}
+.drag-handle{color:var(--text3);cursor:grab;font-size:1rem;padding:0 4px;user-select:none}
+.drag-handle:active{cursor:grabbing}
+.icon-pick-btn{font-size:0.65rem;color:var(--accent);cursor:pointer;white-space:nowrap;background:none;border:none;font-family:'Inter',sans-serif;padding:0}
+
+/* ── ICON PICKER ── */
+.icon-picker-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px;max-height:200px;overflow-y:auto;padding:4px}
+.icon-pick-item{width:100%;aspect-ratio:1;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.icon-pick-item:hover{border-color:var(--accent);background:rgba(167,139,250,0.1)}
+.icon-pick-item.selected{border-color:var(--accent);background:rgba(167,139,250,0.15)}
+.icon-pick-item svg{width:20px;height:20px}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 16px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:0.82rem;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#9061f9}
+.btn-secondary{background:rgba(255,255,255,0.07);color:var(--text1);border:1px solid var(--border)}
+.btn-secondary:hover{background:rgba(255,255,255,0.12)}
+.btn-danger{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.btn-danger:hover{background:rgba(248,113,113,0.2)}
+.btn-green{background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
+.btn-green:hover{background:rgba(52,211,153,0.2)}
+.btn-sm{padding:5px 10px;font-size:0.75rem}
+.btn-icon-only{width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:6px}
+
+/* ── EXPORT BAR ── */
+.export-bar{padding:14px 16px;border-top:1px solid var(--border);background:var(--panel);flex-shrink:0;display:flex;gap:8px;align-items:center}
+.export-bar .hint{flex:1;font-size:0.72rem;color:var(--text3)}
+.copy-feedback{font-size:0.72rem;color:var(--green);opacity:0;transition:opacity .3s}
+.copy-feedback.show{opacity:1}
+
+/* ── PREVIEW IFRAME ── */
+.preview-pane iframe{width:100%;height:100%;border:none}
+
+/* ── SECTION ADD ── */
+.add-row{display:flex;gap:8px;margin-top:8px}
+
+/* ── DRAG OVER ── */
+.drag-over{outline:2px dashed var(--accent);border-radius:8px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">🔧 Link Hub Editor</div>
+      <div class="tabs-row">
+        <button class="editor-tab active" onclick="switchTab('profile')">Profile</button>
+        <button class="editor-tab" onclick="switchTab('sections')">Sections</button>
+        <button class="editor-tab" onclick="switchTab('import')">Import JSON</button>
+      </div>
+    </div>
+
+    <div class="sidebar-body">
+
+      <!-- ── PROFILE PANEL ── -->
+      <div class="panel active" id="panel-profile">
+
+        <div style="margin-bottom:8px;font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;font-weight:500">Avatar</div>
+        <div class="photo-upload-wrap">
+          <img id="avatar-preview" class="photo-preview" src="https://i.pravatar.cc/150?img=33" alt="avatar"/>
+          <label class="upload-btn" for="avatar-file-input">
+            📁 Upload photo &amp; crop
+            <input type="file" id="avatar-file-input" accept="image/*" onchange="openCrop(this,'avatar')"/>
+          </label>
+        </div>
+        <div class="field">
+          <label>Photo URL (or leave blank if uploaded)</label>
+          <input type="text" id="profile-photo" placeholder="https://..." oninput="syncProfile()"/>
+        </div>
+
+        <div style="margin-bottom:8px;font-size:0.72rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-top:6px">Banner</div>
+        <img id="banner-preview" class="photo-preview banner-prev" src="" alt="banner" style="display:none"/>
+        <label class="upload-btn" for="banner-file-input" style="display:block;margin-bottom:14px">
+          📁 Upload banner &amp; crop
+          <input type="file" id="banner-file-input" accept="image/*" onchange="openCrop(this,'banner')"/>
+        </label>
+        <div class="field">
+          <label>Banner URL (or leave blank if uploaded)</label>
+          <input type="text" id="profile-banner" placeholder="banner.jpg or https://..." oninput="syncProfile()"/>
+        </div>
+
+        <div class="field">
+          <label>Name</label>
+          <input type="text" id="profile-name" value="Alex Rivera" oninput="syncProfile()"/>
+        </div>
+        <div class="field">
+          <label>Bio</label>
+          <textarea id="profile-bio" oninput="syncProfile()">Investor · Content Creator · Tech Enthusiast — sharing tools &amp; referrals I actually use daily.</textarea>
+        </div>
+        <div class="field">
+          <label>Accent colour (avatar ring)</label>
+          <input type="color" id="profile-accent" value="#a78bfa" oninput="syncProfile()"/>
+        </div>
+      </div>
+
+      <!-- ── SECTIONS PANEL ── -->
+      <div class="panel" id="panel-sections">
+        <div id="sections-list"></div>
+        <div class="add-row">
+          <input type="text" id="new-section-name" placeholder="New section name..." style="flex:1;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-family:'Inter',sans-serif;font-size:0.82rem;outline:none"/>
+          <button class="btn btn-green btn-sm" onclick="addSection()">+ Add</button>
+        </div>
+      </div>
+
+      <!-- ── IMPORT PANEL ── -->
+      <div class="panel" id="panel-import">
+        <div class="field">
+          <label>Paste your links.json here</label>
+          <textarea id="import-json" style="min-height:220px;font-family:monospace;font-size:0.78rem" placeholder='{ "profile": { ... }, "sections": [ ... ] }'></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="importJSON()">Load JSON into editor</button>
+        <div id="import-error" style="color:var(--red);font-size:0.78rem;margin-top:8px;display:none"></div>
+      </div>
+
+    </div>
+
+    <div class="export-bar">
+      <div class="hint">Edit → preview → copy JSON → paste into links.json on GitHub</div>
+      <span class="copy-feedback" id="copy-ok">✓ Copied!</span>
+      <button class="btn btn-primary" onclick="copyJSON()">Copy JSON</button>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview-pane">
+    <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+</div>
+
+<!-- CROP MODAL -->
+<div class="modal-overlay" id="crop-modal">
+  <div class="modal">
+    <h3 id="crop-title">Crop Photo</h3>
+    <div class="crop-wrap" id="crop-wrap">
+      <img id="crop-img" class="crop-img" draggable="false"/>
+      <div class="crop-box" id="crop-box"></div>
+    </div>
+    <div class="crop-slider-row">
+      <label>Zoom</label>
+      <input type="range" id="crop-zoom" min="100" max="400" value="100" oninput="applyCropZoom()"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeCrop()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmCrop()">Apply Crop</button>
+    </div>
+  </div>
+</div>
+
+<!-- ICON PICKER MODAL -->
+<div class="modal-overlay" id="icon-modal">
+  <div class="modal">
+    <h3>Choose Icon</h3>
+    <div class="icon-picker-grid" id="icon-grid"></div>
+    <div style="margin-top:12px;font-size:0.75rem;color:var(--text2)">Or upload custom icon:</div>
+    <label class="upload-btn" for="custom-icon-input" style="display:block;margin-top:6px">
+      📁 Upload image as icon
+      <input type="file" id="custom-icon-input" accept="image/*" onchange="uploadCustomIcon(this)"/>
+    </label>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeIconPicker()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   ICON LIBRARY
+══════════════════════════════════════════ */
+const ICONS = {
+  instagram: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="ig1e" cx="30%" cy="107%" r="130%"><stop offset="0%" stop-color="#ffd600"/><stop offset="20%" stop-color="#ff6f00"/><stop offset="45%" stop-color="#e91e63"/><stop offset="70%" stop-color="#ad1aac"/><stop offset="100%" stop-color="#4a00b4"/></radialGradient></defs><rect width="24" height="24" rx="5" fill="url(#ig1e)"/><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="4" fill="none" stroke="white" stroke-width="1.5"/><circle cx="17" cy="7" r="1.2" fill="white"/></svg>`,
+  x: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#000"/><path fill="white" d="M17.53 4h2.19L13.54 11.3 20.8 20h-5.18l-4.33-5.66L6.34 20H4.14l6.54-7.48L4 4h5.3l3.91 5.11L17.53 4Zm-.77 14.4h1.21L7.33 5.24H6.03l10.73 13.16Z"/></svg>`,
+  youtube: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#FF0000"/><path d="M19.6 8.2a2 2 0 0 0-1.4-1.4C17 6.5 12 6.5 12 6.5s-5 0-6.2.3a2 2 0 0 0-1.4 1.4C4.1 9.4 4.1 12 4.1 12s0 2.6.3 3.8a2 2 0 0 0 1.4 1.4C7 17.5 12 17.5 12 17.5s5 0 6.2-.3a2 2 0 0 0 1.4-1.4c.3-1.2.3-3.8.3-3.8s0-2.6-.3-3.8Z" fill="white" opacity="0.9"/><path d="M10.3 14.5V9.5l4.7 2.5-4.7 2.5Z" fill="#FF0000"/></svg>`,
+  linkedin: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#0A66C2"/><circle cx="6.2" cy="6.2" r="1.6" fill="white"/><rect x="4.9" y="9.2" width="2.6" height="9.8" rx="0.4" fill="white"/><path fill="white" d="M10.2 9.2h2.5v1.3c.6-.9 1.6-1.5 2.8-1.5 2.2 0 3.5 1.4 3.5 3.9v6.1h-2.6v-5.6c0-1.2-.5-1.9-1.5-1.9-1.1 0-1.7.8-1.7 2v5.5h-2.6V9.2Z"/></svg>`,
+  github: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#171515"/><path fill="white" d="M12 2.25A9.75 9.75 0 0 0 2.25 12c0 4.31 2.79 7.96 6.67 9.24.49.09.67-.21.67-.47v-1.65c-2.71.59-3.29-1.31-3.29-1.31-.44-1.13-1.08-1.43-1.08-1.43-.88-.6.07-.59.07-.59.98.07 1.49 1 1.49 1 .87 1.49 2.28 1.06 2.83.81.09-.63.34-1.06.62-1.3-2.16-.25-4.44-1.08-4.44-4.81 0-1.06.38-1.93 1-2.61-.1-.25-.44-1.24.1-2.58 0 0 .82-.26 2.68 1a9.33 9.33 0 0 1 4.88 0c1.86-1.26 2.68-1 2.68-1 .54 1.34.2 2.33.1 2.58.62.68 1 1.55 1 2.61 0 3.74-2.28 4.56-4.45 4.8.35.3.66.9.66 1.82v2.7c0 .26.18.57.67.47A9.75 9.75 0 0 0 21.75 12 9.75 9.75 0 0 0 12 2.25Z"/></svg>`,
+  tradingview: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#1848CC"/><path d="M4 16l4-5 3 3 4-6 5 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="4" cy="16" r="1.3" fill="#2962FF"/><circle cx="20" cy="12" r="1.3" fill="white"/></svg>`,
+  wise: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#9FE870"/><text x="12" y="16.5" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="11" fill="#163300">W</text></svg>`,
+  revolut: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#191C1F"/><path fill="white" d="M9 5h4.5a3.5 3.5 0 0 1 1.04 6.84l2.4 3.16H14.3l-2.2-2.9H11v2.9H9V5Zm2 2v3h2.5a1.5 1.5 0 0 0 0-3H11Z"/></svg>`,
+  moomoo: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#FF6A00"/><text x="12" y="16" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="10" fill="white">moo</text></svg>`,
+  blog: `<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z"/></svg>`,
+  newsletter: `<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+  link: `<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  star: `<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+};
+
+/* custom icons (base64 uploaded) */
+const CUSTOM_ICONS = {};
+
+function getIcon(key) {
+  if (CUSTOM_ICONS[key]) return `<img src="${CUSTOM_ICONS[key]}" style="width:20px;height:20px;border-radius:4px;object-fit:cover"/>`;
+  return ICONS[key] || ICONS['link'];
+}
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let state = {
+  profile: {
+    name: "Alex Rivera",
+    bio: "Investor · Content Creator · Tech Enthusiast — sharing tools & referrals I actually use daily.",
+    photo: "profile.png",
+    banner: "banner.jpg",
+    accent: "#a78bfa"
+  },
+  sections: [
+    {
+      id: "social", title: "Connect", accentColor: "#818cf8",
+      links: [
+        { label:"Instagram", url:"https://instagram.com/yourhandle", icon:"instagram" },
+        { label:"X",         url:"https://x.com/yourhandle",         icon:"x" },
+        { label:"YouTube",   url:"https://youtube.com/@yourchannel", icon:"youtube" },
+        { label:"LinkedIn",  url:"https://linkedin.com/in/yourname", icon:"linkedin" },
+        { label:"GitHub",    url:"https://github.com/yourusername",  icon:"github" }
+      ]
+    },
+    {
+      id:"referrals", title:"Referral Links", accentColor:"#34d399",
+      links:[
+        { label:"TradingView", url:"https://tradingview.com/?aff_id=yourcode", icon:"tradingview", badge:"30 days free Pro" },
+        { label:"Wise",        url:"https://wise.com/invite/yourcode",          icon:"wise",        badge:"Fee-free transfer" },
+        { label:"Revolut",     url:"https://revolut.com/referral/yourcode",     icon:"revolut",     badge:"Signup bonus" },
+        { label:"Moomoo",      url:"https://moomoo.com/us/invite/yourcode",     icon:"moomoo",      badge:"5 free stocks" }
+      ]
+    },
+    {
+      id:"other", title:"Other", accentColor:"#fb923c",
+      links:[
+        { label:"My Blog",    url:"https://yourblog.com",     icon:"blog" },
+        { label:"Newsletter", url:"https://yoursubstack.com", icon:"newsletter" }
+      ]
+    }
+  ]
+};
+
+/* ══════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════ */
+function switchTab(name) {
+  document.querySelectorAll('.editor-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['profile','sections','import'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+/* ══════════════════════════════════════════
+   PROFILE SYNC
+══════════════════════════════════════════ */
+function syncProfile() {
+  state.profile.name   = document.getElementById('profile-name').value;
+  state.profile.bio    = document.getElementById('profile-bio').value;
+  state.profile.photo  = document.getElementById('profile-photo').value || state.profile.photo;
+  state.profile.banner = document.getElementById('profile-banner').value || state.profile.banner;
+  state.profile.accent = document.getElementById('profile-accent').value;
+  refreshPreview();
+}
+
+function loadProfileToForm() {
+  document.getElementById('profile-name').value   = state.profile.name;
+  document.getElementById('profile-bio').value    = state.profile.bio;
+  document.getElementById('profile-photo').value  = state.profile.photo || '';
+  document.getElementById('profile-banner').value = state.profile.banner || '';
+  document.getElementById('profile-accent').value = state.profile.accent || '#a78bfa';
+  if (state.profile.photo) {
+    document.getElementById('avatar-preview').src = state.profile.photo;
+  }
+}
+
+/* ══════════════════════════════════════════
+   SECTIONS RENDERER
+══════════════════════════════════════════ */
+function renderSections() {
+  const list = document.getElementById('sections-list');
+  list.innerHTML = '';
+  state.sections.forEach((sec, si) => {
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.dataset.si = si;
+
+    card.innerHTML = `
+      <div class="section-card-header" onclick="toggleSection(${si})">
+        <div class="section-color-dot" style="background:${sec.accentColor}"></div>
+        <div class="section-card-title">${sec.title}</div>
+        <input type="color" value="${sec.accentColor}" title="Accent colour"
+          onclick="event.stopPropagation()"
+          oninput="event.stopPropagation();state.sections[${si}].accentColor=this.value;renderSections();refreshPreview()"
+          style="width:24px;height:24px;padding:2px;border:none;background:none;cursor:pointer;border-radius:4px"/>
+        <input type="text" value="${sec.title}" placeholder="Section name"
+          onclick="event.stopPropagation()"
+          oninput="event.stopPropagation();state.sections[${si}].title=this.value;renderSections();refreshPreview()"
+          style="width:110px;padding:4px 8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:var(--text1);font-size:0.78rem;font-family:'Inter',sans-serif;outline:none"/>
+        <button class="btn btn-danger btn-sm btn-icon-only" title="Delete section"
+          onclick="event.stopPropagation();deleteSection(${si})">✕</button>
+      </div>
+      <div class="section-card-body collapsed" id="sec-body-${si}">
+        <div id="links-list-${si}"></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-secondary btn-sm" onclick="addLink(${si})">+ Add link</button>
+        </div>
+      </div>`;
+
+    list.appendChild(card);
+    renderLinks(si);
+  });
+}
+
+function toggleSection(si) {
+  const body = document.getElementById('sec-body-'+si);
+  body.classList.toggle('collapsed');
+}
+
+function renderLinks(si) {
+  const container = document.getElementById('links-list-'+si);
+  if (!container) return;
+  container.innerHTML = '';
+  state.sections[si].links.forEach((link, li) => {
+    const row = document.createElement('div');
+    row.className = 'link-row';
+    row.draggable = true;
+    row.dataset.li = li;
+    row.innerHTML = `
+      <span class="drag-handle" title="Drag to reorder">⠿</span>
+      <div class="link-row-icon" onclick="openIconPicker(${si},${li})" title="Change icon">
+        ${getIcon(link.icon)}
+      </div>
+      <div class="link-row-inputs">
+        <input type="text" value="${link.label}" placeholder="Label"
+          oninput="state.sections[${si}].links[${li}].label=this.value;refreshPreview()"/>
+        <input type="text" value="${link.url}" placeholder="https://..."
+          oninput="state.sections[${si}].links[${li}].url=this.value;refreshPreview()"/>
+        <input type="text" value="${link.badge||''}" placeholder="Badge text (optional)"
+          style="font-size:0.72rem;color:var(--text2)"
+          oninput="state.sections[${si}].links[${li}].badge=this.value;refreshPreview()"/>
+      </div>
+      <button class="btn btn-danger btn-sm btn-icon-only" title="Remove" onclick="deleteLink(${si},${li})">✕</button>`;
+
+    /* drag-and-drop reorder */
+    row.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', JSON.stringify({si,li})); row.style.opacity='0.4'; });
+    row.addEventListener('dragend',   () => row.style.opacity='1');
+    row.addEventListener('dragover',  e => { e.preventDefault(); row.classList.add('drag-over'); });
+    row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+    row.addEventListener('drop', e => {
+      e.preventDefault(); row.classList.remove('drag-over');
+      const {si:fromSi, li:fromLi} = JSON.parse(e.dataTransfer.getData('text/plain'));
+      if (fromSi !== si) return;
+      const moved = state.sections[si].links.splice(fromLi,1)[0];
+      state.sections[si].links.splice(li,0,moved);
+      renderLinks(si); refreshPreview();
+    });
+
+    container.appendChild(row);
+  });
+}
+
+function addLink(si) {
+  state.sections[si].links.push({ label:'New Link', url:'https://', icon:'link' });
+  renderLinks(si); refreshPreview();
+}
+
+function deleteLink(si, li) {
+  state.sections[si].links.splice(li,1);
+  renderLinks(si); refreshPreview();
+}
+
+function addSection() {
+  const nameInput = document.getElementById('new-section-name');
+  const name = nameInput.value.trim() || 'New Section';
+  const colors = ['#818cf8','#34d399','#fb923c','#f472b6','#60a5fa','#a78bfa'];
+  state.sections.push({
+    id: 'sec_'+Date.now(),
+    title: name,
+    accentColor: colors[state.sections.length % colors.length],
+    links: []
+  });
+  nameInput.value = '';
+  renderSections(); refreshPreview();
+  switchTab('sections');
+}
+
+function deleteSection(si) {
+  if (!confirm(`Delete "${state.sections[si].title}"?`)) return;
+  state.sections.splice(si,1);
+  renderSections(); refreshPreview();
+}
+
+/* ══════════════════════════════════════════
+   ICON PICKER
+══════════════════════════════════════════ */
+let iconPickTarget = null;
+
+function openIconPicker(si, li) {
+  iconPickTarget = {si, li};
+  const grid = document.getElementById('icon-grid');
+  grid.innerHTML = '';
+  const currentIcon = state.sections[si].links[li].icon;
+  Object.keys(ICONS).forEach(key => {
+    const item = document.createElement('div');
+    item.className = 'icon-pick-item' + (key===currentIcon?' selected':'');
+    item.innerHTML = ICONS[key];
+    item.title = key;
+    item.onclick = () => { selectIcon(key); };
+    grid.appendChild(item);
+  });
+  document.getElementById('icon-modal').classList.add('open');
+}
+
+function selectIcon(key) {
+  if (!iconPickTarget) return;
+  const {si,li} = iconPickTarget;
+  state.sections[si].links[li].icon = key;
+  closeIconPicker();
+  renderLinks(si); refreshPreview();
+}
+
+function uploadCustomIcon(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const key = 'custom_'+Date.now();
+    CUSTOM_ICONS[key] = e.target.result;
+    selectIcon(key);
+  };
+  reader.readAsDataURL(file);
+}
+
+function closeIconPicker() {
+  document.getElementById('icon-modal').classList.remove('open');
+  iconPickTarget = null;
+}
+
+/* ══════════════════════════════════════════
+   CROP
+══════════════════════════════════════════ */
+let cropTarget = null; // 'avatar' or 'banner'
+let cropScale = 1;
+let cropDrag = false, cropDragStart = {x:0,y:0}, cropBoxPos = {x:0,y:0};
+
+function openCrop(input, target) {
+  const file = input.files[0]; if (!file) return;
+  cropTarget = target;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('crop-img');
+    img.src = e.target.result;
+    img.onload = () => {
+      cropScale = 1;
+      document.getElementById('crop-zoom').value = 100;
+      const wrap = document.getElementById('crop-wrap');
+      const ww = wrap.clientWidth, wh = wrap.clientHeight;
+      const naturalScale = Math.max(ww/img.naturalWidth, wh/img.naturalHeight);
+      img.style.width  = (img.naturalWidth * naturalScale) + 'px';
+      img.style.height = (img.naturalHeight * naturalScale) + 'px';
+      img.style.left = '0px'; img.style.top = '0px';
+
+      const box = document.getElementById('crop-box');
+      const isAvatar = target === 'avatar';
+      const bSize = isAvatar ? Math.min(ww,wh)*0.65 : ww*0.9;
+      const bH    = isAvatar ? bSize : bSize*0.38;
+      box.style.width  = bSize+'px';
+      box.style.height = bH+'px';
+      box.style.left   = ((ww-bSize)/2)+'px';
+      box.style.top    = ((wh-bH)/2)+'px';
+      box.classList.toggle('circle-mask', isAvatar);
+      cropBoxPos = { x:(ww-bSize)/2, y:(wh-bH)/2 };
+
+      document.getElementById('crop-title').textContent = isAvatar ? 'Crop Avatar' : 'Crop Banner';
+    };
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('crop-modal').classList.add('open');
+}
+
+function applyCropZoom() {
+  const zoom = document.getElementById('crop-zoom').value / 100;
+  cropScale = zoom;
+  const img = document.getElementById('crop-img');
+  const wrap = document.getElementById('crop-wrap');
+  const ww = wrap.clientWidth, wh = wrap.clientHeight;
+  const baseW = parseFloat(img.dataset.baseW || img.clientWidth);
+  const baseH = parseFloat(img.dataset.baseH || img.clientHeight);
+  if (!img.dataset.baseW) { img.dataset.baseW = img.clientWidth; img.dataset.baseH = img.clientHeight; }
+  img.style.width  = (baseW * zoom) + 'px';
+  img.style.height = (baseH * zoom) + 'px';
+}
+
+/* drag image inside crop wrap */
+(function setupCropDrag(){
+  const img = document.getElementById('crop-img');
+  let sx=0,sy=0,ox=0,oy=0;
+  img.addEventListener('mousedown', e => { cropDrag=true; sx=e.clientX; sy=e.clientY; ox=parseFloat(img.style.left)||0; oy=parseFloat(img.style.top)||0; });
+  document.addEventListener('mousemove', e => {
+    if (!cropDrag) return;
+    img.style.left = (ox+(e.clientX-sx))+'px';
+    img.style.top  = (oy+(e.clientY-sy))+'px';
+  });
+  document.addEventListener('mouseup', () => cropDrag=false);
+})();
+
+function confirmCrop() {
+  const img = document.getElementById('crop-img');
+  const box = document.getElementById('crop-box');
+  const wrap = document.getElementById('crop-wrap');
+  const wrapRect = wrap.getBoundingClientRect();
+  const imgRect  = img.getBoundingClientRect();
+  const boxRect  = box.getBoundingClientRect();
+
+  const scaleX = img.naturalWidth / imgRect.width;
+  const scaleY = img.naturalHeight / imgRect.height;
+  const sx = (boxRect.left - imgRect.left) * scaleX;
+  const sy = (boxRect.top  - imgRect.top)  * scaleY;
+  const sw = boxRect.width  * scaleX;
+  const sh = boxRect.height * scaleY;
+
+  const canvas = document.createElement('canvas');
+  const outW = cropTarget==='avatar' ? 200 : 800;
+  const outH = cropTarget==='avatar' ? 200 : 300;
+  canvas.width = outW; canvas.height = outH;
+  const ctx = canvas.getContext('2d');
+  if (cropTarget==='avatar') {
+    ctx.beginPath(); ctx.arc(outW/2,outH/2,outW/2,0,Math.PI*2); ctx.clip();
+  }
+  const srcImg = new Image(); srcImg.src = img.src;
+  srcImg.onload = () => {
+    ctx.drawImage(srcImg, sx, sy, sw, sh, 0, 0, outW, outH);
+    const dataUrl = canvas.toDataURL('image/png');
+    if (cropTarget==='avatar') {
+      document.getElementById('avatar-preview').src = dataUrl;
+      state.profile.photo = dataUrl;
+      document.getElementById('profile-photo').value = '';
+    } else {
+      const prev = document.getElementById('banner-preview');
+      prev.src = dataUrl; prev.style.display='block';
+      state.profile.banner = dataUrl;
+      document.getElementById('profile-banner').value = '';
+    }
+    refreshPreview();
+    closeCrop();
+  };
+}
+
+function closeCrop() {
+  document.getElementById('crop-modal').classList.remove('open');
+  cropTarget = null;
+}
+
+/* ══════════════════════════════════════════
+   IMPORT JSON
+══════════════════════════════════════════ */
+function importJSON() {
+  const raw = document.getElementById('import-json').value.trim();
+  const err = document.getElementById('import-error');
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed.profile || !parsed.sections) throw new Error('Missing "profile" or "sections" key');
+    state = parsed;
+    loadProfileToForm();
+    renderSections();
+    refreshPreview();
+    err.style.display='none';
+    document.getElementById('import-json').value='';
+    switchTab('profile');
+    alert('✓ JSON loaded successfully!');
+  } catch(e) {
+    err.textContent = '⚠ ' + e.message;
+    err.style.display='block';
+  }
+}
+
+/* ══════════════════════════════════════════
+   EXPORT / COPY JSON
+══════════════════════════════════════════ */
+function buildExportState() {
+  // Replace base64 photo with filename hint if it's a data URL
+  const s = JSON.parse(JSON.stringify(state));
+  if (s.profile.photo && s.profile.photo.startsWith('data:')) s.profile.photo = 'profile.png';
+  if (s.profile.banner && s.profile.banner.startsWith('data:')) s.profile.banner = 'banner.jpg';
+  // Strip custom icon base64 from export — use key name instead
+  s.sections.forEach(sec => sec.links.forEach(link => {
+    if (link.icon && link.icon.startsWith('custom_')) link.icon = 'default';
+  }));
+  return s;
+}
+
+function copyJSON() {
+  const json = JSON.stringify(buildExportState(), null, 2);
+  navigator.clipboard.writeText(json).then(() => {
+    const fb = document.getElementById('copy-ok');
+    fb.classList.add('show');
+    setTimeout(() => fb.classList.remove('show'), 2500);
+  });
+}
+
+/* ══════════════════════════════════════════
+   LIVE PREVIEW
+══════════════════════════════════════════ */
+function refreshPreview() {
+  const s = state;
+  const ICONS_STR = JSON.stringify(ICONS);
+  const CUSTOM_STR = JSON.stringify(CUSTOM_ICONS);
+
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#07070f;--glass:rgba(255,255,255,0.042);--glass-b:rgba(255,255,255,0.075);--glass-hover:rgba(255,255,255,0.075);--text-1:rgba(255,255,255,0.92);--text-2:rgba(255,255,255,0.48);--text-3:rgba(255,255,255,0.22);--radius:16px;--accent:${s.profile.accent||'#a78bfa'}}
+html,body{min-height:100%}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text-1);overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg canvas{position:absolute;inset:0;width:100%;height:100%}
+.page{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:0 0 88px}
+.banner-wrap{width:100%;height:175px;border-radius:0 0 24px 24px;overflow:hidden;background:linear-gradient(135deg,rgba(109,40,217,0.5),rgba(29,78,216,0.4),rgba(6,95,70,0.35));border-bottom:1px solid rgba(255,255,255,0.07)}
+.banner-img{width:100%;height:100%;object-fit:cover;display:block}
+.profile{text-align:center;margin-bottom:28px}
+.avatar-row{display:flex;justify-content:center;margin-top:-46px;margin-bottom:14px}
+.avatar-wrap{position:relative;display:inline-block;border-radius:24px;padding:3px;background:linear-gradient(135deg,var(--accent),#3b82f6,#7c3aed,#60a5fa,var(--accent));background-size:300% 300%;animation:gradientShift 3s ease infinite;box-shadow:0 0 18px rgba(139,92,246,0.5),0 0 36px rgba(59,130,246,0.25)}
+@keyframes gradientShift{0%,100%{background-position:0% 50%;box-shadow:0 0 18px rgba(139,92,246,0.6),0 0 36px rgba(59,130,246,0.2)}50%{background-position:100% 50%;box-shadow:0 0 28px rgba(59,130,246,0.7),0 0 48px rgba(139,92,246,0.3)}}
+.avatar-img{width:92px;height:92px;border-radius:20px;border:2px solid var(--bg);object-fit:cover;display:block}
+.name{font-family:'Syne',sans-serif;font-size:clamp(1.6rem,5vw,2rem);font-weight:600;letter-spacing:-0.02em;margin-bottom:8px}
+.bio{font-size:0.875rem;color:var(--text-2);font-weight:300;line-height:1.65;max-width:320px;margin:0 auto}
+.nav-wrap{display:flex;justify-content:center;margin:24px 18px 32px}
+.nav-bar{display:inline-flex;align-items:center;gap:2px;padding:5px 6px;background:rgba(15,15,22,0.82);border:1px solid rgba(255,255,255,0.1);border-radius:99px;backdrop-filter:blur(20px);box-shadow:0 4px 32px rgba(0,0,0,0.5);white-space:nowrap;overflow-x:auto;position:relative;scrollbar-width:none}
+.nav-bar::-webkit-scrollbar{display:none}
+.nav-pill-slider{position:absolute;top:5px;left:6px;height:calc(100% - 10px);background:rgba(255,255,255,0.12);border-radius:99px;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:transform 0.3s cubic-bezier(.34,1.56,.64,1),width 0.3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:0}
+.nav-tab{font-family:'Inter',sans-serif;font-size:0.75rem;font-weight:500;padding:7px 16px;border-radius:99px;border:none;background:transparent;color:rgba(255,255,255,0.45);cursor:pointer;transition:color .2s;position:relative;z-index:1;white-space:nowrap}
+.nav-tab.active{color:rgba(255,255,255,0.95)}
+.sections-wrap{padding:0 18px}
+.section{margin-bottom:32px}
+.section.hidden{display:none}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:0 2px}
+.section-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.section-title{font-size:0.68rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-3)}
+.section-line{flex:1;height:1px;background:rgba(255,255,255,0.06)}
+.links{display:flex;flex-direction:column;gap:9px}
+.link-btn{display:flex;align-items:center;gap:13px;padding:13px 18px;background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius);text-decoration:none;color:var(--text-1);cursor:pointer;transition:background .2s,border-color .2s,transform .2s,box-shadow .2s;backdrop-filter:blur(14px);position:relative;overflow:hidden}
+.link-btn:hover{background:var(--glass-hover);transform:translateY(-2px);box-shadow:0 10px 36px rgba(0,0,0,.35)}
+.beam-ring{position:absolute;inset:0;border-radius:var(--radius);pointer-events:none;border:1.5px solid transparent;opacity:0;transition:opacity 0.3s ease;z-index:1}
+.link-btn:hover .beam-ring{opacity:1;border-color:#a78bfa;animation:neonPulse 2s ease-in-out infinite}
+@keyframes neonPulse{0%,100%{border-color:#a78bfa;box-shadow:0 0 4px #a78bfa,0 0 10px #a78bfa,0 0 22px #7c3aed}50%{border-color:#60a5fa;box-shadow:0 0 6px #60a5fa,0 0 18px #3b82f6,0 0 40px #1d4ed8}}
+.btn-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;flex-shrink:0;overflow:hidden}
+.btn-icon svg{width:28px;height:28px}
+.btn-text{flex:1;font-size:0.88rem;font-weight:400}
+.btn-badge{font-size:0.67rem;font-weight:500;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);color:var(--text-2);white-space:nowrap;flex-shrink:0}
+.btn-arrow{font-size:0.8rem;color:var(--text-3);flex-shrink:0;transition:transform .2s}
+.link-btn:hover .btn-arrow{transform:translateX(3px)}
+.footer{text-align:center;margin-top:52px;color:var(--text-3);font-size:0.72rem;letter-spacing:0.06em}
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style></head><body>
+<div class="bg"><canvas id="mesh"></canvas></div>
+<main class="page" id="app"></main>
+<script>
+const ICONS=${ICONS_STR};
+const CUSTOM_ICONS=${CUSTOM_STR};
+function getIcon(k){if(CUSTOM_ICONS[k])return '<img src="'+CUSTOM_ICONS[k]+'" style="width:20px;height:20px;border-radius:4px;object-fit:cover"/>';return ICONS[k]||ICONS['link']||''}
+const DATA=${JSON.stringify(s)};
+function setFilter(id){
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('active',t.dataset.filter===id));
+  const activeTab=document.querySelector('.nav-tab.active');
+  const slider=document.querySelector('.nav-pill-slider');
+  if(activeTab&&slider){const nav=document.querySelector('.nav-bar');const nr=nav.getBoundingClientRect();const tr=activeTab.getBoundingClientRect();slider.style.width=tr.width+'px';slider.style.transform='translateX('+(tr.left-nr.left-6+nav.scrollLeft)+'px)'}
+  document.querySelectorAll('.section[data-id]').forEach(s=>{const show=id==='all'||s.dataset.id===id;if(!show){s.style.transition='opacity 0.18s ease,transform 0.18s ease';s.style.opacity='0';s.style.transform='translateY(8px)';setTimeout(()=>s.classList.add('hidden'),180)}});
+  setTimeout(()=>{document.querySelectorAll('.section[data-id]').forEach(s=>{const show=id==='all'||s.dataset.id===id;if(show){s.classList.remove('hidden');s.style.opacity='0';s.style.transform='translateY(10px)';requestAnimationFrame(()=>requestAnimationFrame(()=>{s.style.transition='opacity 0.28s ease,transform 0.28s cubic-bezier(.22,1,.36,1)';s.style.opacity='1';s.style.transform='translateY(0)'}))}})} ,180);
+}
+(function build(){
+  const{profile,sections}=DATA;
+  document.title=profile.name+' — Links';
+  const bannerContent=profile.banner?'<img class="banner-img" src="'+profile.banner+'" alt="banner" onerror="this.style.display=\'none\'"/>':'';
+  document.getElementById('app').innerHTML='<div class="banner-wrap">'+bannerContent+'</div><div class="profile"><div class="avatar-row"><div class="avatar-wrap"><img class="avatar-img" src="'+profile.photo+'" alt="'+profile.name+'"/></div></div><h1 class="name">'+profile.name+'</h1><p class="bio">'+profile.bio+'</p></div><div class="nav-wrap"><nav class="nav-bar"><div class="nav-pill-slider"></div><button class="nav-tab active" data-filter="all" onclick="setFilter(\'all\')">All</button>'+sections.map(s=>'<button class="nav-tab" data-filter="'+s.id+'" onclick="setFilter(\''+s.id+'\')">'+s.title+'</button>').join('')+'</nav></div><div class="sections-wrap">'+sections.map((sec,si)=>'<section class="section" data-id="'+sec.id+'" style="animation-delay:'+(si*0.08+0.1)+'s"><div class="section-header"><span class="section-dot" style="background:'+sec.accentColor+'"></span><span class="section-title">'+sec.title+'</span><div class="section-line"></div></div><div class="links">'+sec.links.map(link=>'<a class="link-btn" href="'+link.url+'" target="_blank" rel="noopener"><span class="btn-icon">'+getIcon(link.icon)+'</span><span class="btn-text">'+link.label+'</span>'+(link.badge?'<span class="btn-badge">'+link.badge+'</span>':'')+'<span class="btn-arrow">›</span><span class="beam-ring"></span></a>').join('')+'</div></section>').join('')+'<div class="footer">'+profile.name+' · built with ♡</div></div>';
+  requestAnimationFrame(()=>{const activeTab=document.querySelector('.nav-tab.active');const slider=document.querySelector('.nav-pill-slider');if(activeTab&&slider){const nav=document.querySelector('.nav-bar');const nr=nav.getBoundingClientRect();const tr=activeTab.getBoundingClientRect();slider.style.width=tr.width+'px';slider.style.transform='translateX('+(tr.left-nr.left-6)+'px)';slider.style.transition='none';requestAnimationFrame(()=>slider.style.transition='')}});
+})();
+(function mesh(){const canvas=document.getElementById('mesh');const ctx=canvas.getContext('2d');function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}resize();window.addEventListener('resize',resize);const blobs=[{x:0.15,y:0.10,r:0.52,color:[109,40,217],},{x:0.80,y:0.25,r:0.45,color:[29,78,216]},{x:0.50,y:0.70,r:0.48,color:[6,95,70]},{x:0.20,y:0.80,r:0.38,color:[124,58,237]},{x:0.85,y:0.75,r:0.40,color:[30,64,175]},{x:0.50,y:0.35,r:0.35,color:[76,29,149]}];const phases=blobs.map(()=>({px:Math.random()*Math.PI*2,py:Math.random()*Math.PI*2,ampx:0.12+Math.random()*0.1,ampy:0.10+Math.random()*0.1,speed:0.0004+Math.random()*0.0003}));let t=0;function draw(){const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);ctx.fillStyle='#07070f';ctx.fillRect(0,0,W,H);blobs.forEach((b,i)=>{const p=phases[i];const cx=(b.x+Math.sin(t*p.speed+p.px)*p.ampx)*W;const cy=(b.y+Math.cos(t*p.speed+p.py)*p.ampy)*H;const radius=b.r*Math.min(W,H);const[r,g,bl]=b.color;const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,radius);grad.addColorStop(0,'rgba('+r+','+g+','+bl+',0.28)');grad.addColorStop(0.5,'rgba('+r+','+g+','+bl+',0.10)');grad.addColorStop(1,'rgba('+r+','+g+','+bl+',0)');ctx.globalCompositeOperation='screen';ctx.fillStyle=grad;ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.fill()});ctx.globalCompositeOperation='source-over';t++;requestAnimationFrame(draw)}draw()})();
+<\/script></body></html>`;
+
+  const frame = document.getElementById('preview-frame');
+  frame.srcdoc = html;
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+loadProfileToForm();
+renderSections();
+refreshPreview();
+</script>
+</body>
+</html>
