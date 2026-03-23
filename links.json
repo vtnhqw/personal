@@ -1,9 +1,9 @@
 {
   "profile": {
     "name": "Alex Rivera",
-    "bio": "Investor · Content Creator · Tech Enthusiast — sharing tools & referrals I actually use daily.",
+    "bio": "Investor \u00b7 Content Creator \u00b7 Tech Enthusiast \u2014 sharing tools & referrals I actually use daily.",
     "photo": "profile.png",
-    "banner": "banner.png",
+    "banner": "banner.jpg",
     "accent": "#a78bfa"
   },
   "sections": [
@@ -12,11 +12,36 @@
       "title": "Connect",
       "accentColor": "#818cf8",
       "links": [
-        { "label": "Instagram", "url": "https://instagram.com/yourhandle", "icon": "instagram" },
-        { "label": "X",         "url": "https://x.com/yourhandle",         "icon": "x" },
-        { "label": "YouTube",   "url": "https://youtube.com/@yourchannel", "icon": "youtube" },
-        { "label": "LinkedIn",  "url": "https://linkedin.com/in/yourname", "icon": "linkedin" },
-        { "label": "GitHub",    "url": "https://github.com/yourusername",  "icon": "github" }
+        {
+          "label": "Instagram",
+          "url": "https://instagram.com/yourhandle",
+          "icon": "instagram"
+        },
+        {
+          "label": "X",
+          "url": "https://x.com/yourhandle",
+          "icon": "x"
+        },
+        {
+          "label": "YouTube",
+          "url": "https://youtube.com/@yourchannel",
+          "icon": "youtube"
+        },
+        {
+          "label": "LinkedIn",
+          "url": "https://linkedin.com/in/yourname",
+          "icon": "linkedin"
+        },
+        {
+          "label": "GitHub",
+          "url": "https://github.com/yourusername",
+          "icon": "github"
+        },
+        {
+          "label": "Email",
+          "url": "mailto:youremail@gmail.com",
+          "icon": "newsletter"
+        }
       ]
     },
     {
@@ -24,19 +49,60 @@
       "title": "Referral Links",
       "accentColor": "#34d399",
       "links": [
-        { "label": "TradingView", "url": "https://tradingview.com/?aff_id=yourcode", "icon": "tradingview", "badge": "30 days free Pro" },
-        { "label": "Wise",        "url": "https://wise.com/invite/yourcode",          "icon": "wise",        "badge": "Fee-free transfer" },
-        { "label": "Revolut",     "url": "https://revolut.com/referral/yourcode",     "icon": "revolut",     "badge": "Signup bonus" },
-        { "label": "Moomoo",      "url": "https://moomoo.com/us/invite/yourcode",     "icon": "moomoo",      "badge": "5 free stocks" }
+        {
+          "label": "TradingView",
+          "url": "https://tradingview.com/?aff_id=yourcode",
+          "icon": "tradingview",
+          "badge": "30 days free Pro"
+        },
+        {
+          "label": "Moomoo",
+          "url": "https://moomoo.com/us/invite/yourcode",
+          "icon": "moomoo",
+          "badge": "5 free stocks"
+        },
+        {
+          "label": "Webull",
+          "url": "https://webull.com",
+          "icon": "webull",
+          "badge": "Free stocks"
+        },
+        {
+          "label": "M+ Global",
+          "url": "https://mplus.com",
+          "icon": "mplus",
+          "badge": "Sign up bonus"
+        },
+        {
+          "label": "Setel",
+          "url": "https://setel.com/referral/yourcode",
+          "icon": "setel",
+          "badge": "Referral bonus"
+        },
+        {
+          "label": "Wise",
+          "url": "https://wise.com/invite/yourcode",
+          "icon": "wise",
+          "badge": "Fee-free transfer"
+        },
+        {
+          "label": "Aeon Bank",
+          "url": "https://aeonbank.com.my/referral/yourcode",
+          "icon": "aeonbank",
+          "badge": "Referral bonus"
+        }
       ]
     },
     {
       "id": "other",
-      "title": "Other",
+      "title": "Website",
       "accentColor": "#fb923c",
       "links": [
-        { "label": "My Blog",    "url": "https://yourblog.com",     "icon": "blog" },
-        { "label": "Newsletter", "url": "https://yoursubstack.com", "icon": "newsletter" }
+        {
+          "label": "My Blog",
+          "url": "https://yourblog.com",
+          "icon": "myblog"
+        }
       ]
     }
   ]
